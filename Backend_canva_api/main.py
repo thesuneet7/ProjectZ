@@ -32,7 +32,7 @@ def _sync_pdf_extraction(pdf_file):
 def summarize_text(text):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4-turbo",
+            model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": "Summarize this text concisely."},
                       {"role": "user", "content": text}],
             temperature=0.5,
