@@ -1,5 +1,4 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from pydantic import BaseModel
 import openai
 import pypdf
 import os
@@ -12,10 +11,12 @@ load_dotenv()
 # Initialize FastAPI
 app = FastAPI()
 
-# Set your OpenAI API Key from GitHub Secrets
+# Retrieve OpenAI API Key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY is not set. Please configure GitHub Secrets properly.")
+    raise ValueError("OPENAI_API_KEY is not set. Make sure to define it in the .env file.")
+
+openai.api_key = OPENAI_API_KEY  # Set the OpenAI API key
 
 # Function to extract text from PDFs asynchronously
 async def extract_text_from_pdf(pdf_file):
@@ -28,17 +29,17 @@ def _sync_pdf_extraction(pdf_file):
     text = "".join(page.extract_text() + "\n" for page in pdf_reader.pages if page.extract_text())
     return text
 
-# Function to summarize text using OpenAI
+# Function to summarize text using OpenAI (GPT-3.5)
 def summarize_text(text):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "Summarize this text concisely."},
-                      {"role": "user", "content": text}],
-            temperature=0.5,
-            max_tokens=300
+        # Use GPT-3.5 with the new OpenAI API
+        response = openai.completions.create(
+            model="gpt-3.5-turbo",  # Specify GPT-3.5 model
+            prompt=f"Summarize this text concisely: {text}",
+            max_tokens=300,
+            temperature=0.5
         )
-        return response["choices"][0]["message"]["content"]
+        return response['choices'][0]['text'].strip()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
