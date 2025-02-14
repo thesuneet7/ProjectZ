@@ -1,0 +1,2 @@
+1. Clone this repo locally and then insde the Backend_canva_api folder create a ".env" file.
+2. Paste this inside the .env file: in whatsapp group you see pls.
