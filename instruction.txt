@@ -1,2 +1,3 @@
 1. Clone this repo locally and then insde the Backend_canva_api folder create a ".env" file.
 2. Paste this inside the .env file: in whatsapp group you see pls.
+3. agar kuch bhi commit krke push krne time error dikha rha hai put this command in terminal in the root directory : git reset --soft origin/main
