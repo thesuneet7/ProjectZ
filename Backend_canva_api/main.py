@@ -30,25 +30,19 @@ def _sync_pdf_extraction(pdf_file):
     text = "".join(page.extract_text() + "\n" for page in pdf_reader.pages if page.extract_text())
     return text
 
-logging.basicConfig(level=logging.INFO)
-
 # Function to summarize text using OpenAI (GPT-3.5)
 def summarize_text(text):
     try:
-        logging.info("Sending request to OpenAI API for summarization...")
+        # Use GPT-3.5 with the new OpenAI API
         response = openai.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo",  # Specify GPT-3.5 model
             prompt=f"Summarize this text concisely: {text}",
             max_tokens=300,
             temperature=0.5
         )
-        return response.choices[0].text.strip()
-    except openai.OpenAIError as e:
-        logging.error(f"OpenAI API error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to process request with OpenAI API.")
+        return response['choices'][0]['text'].strip()
     except Exception as e:
-        logging.error(f"Unexpected error: {e}")
-        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # API to handle file upload and summarization
 @app.post("/summarize/")
