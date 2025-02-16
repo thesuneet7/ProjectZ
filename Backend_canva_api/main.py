@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 import openai
+import google.generativeai as genai
 import pypdf
 import os
 import asyncio
@@ -12,12 +13,12 @@ load_dotenv()
 # Initialize FastAPI
 app = FastAPI()
 
-# Retrieve OpenAI API Key
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY is not set. Make sure to define it in the .env file.")
+# Retrieve Gemini API Key
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    raise ValueError("GOOGLE_API_KEY is not set. Make sure to define it in the .env file.")
 
-openai.api_key = OPENAI_API_KEY  # Set the OpenAI API key
+genai.configure(api_key=GOOGLE_API_KEY)  # Set the Gemini API key
 
 # Function to extract text from PDFs asynchronously
 async def extract_text_from_pdf(pdf_file):
@@ -33,14 +34,14 @@ def _sync_pdf_extraction(pdf_file):
 # Function to summarize text using OpenAI (GPT-3.5)
 def summarize_text(text):
     try:
-        # Use GPT-3.5 with the new OpenAI API
-        response = openai.completions.create(
-            model="gpt-3.5-turbo",  # Specify GPT-3.5 model
-            prompt=f"Summarize this text concisely: {text}",
-            max_tokens=300,
-            temperature=0.5
-        )
-        return response['choices'][0]['text'].strip()
+        # Initialize Gemini model
+        model = genai.GenerativeModel("gemini-2.0-flash")  # Use "gemini-1.5-pro" for better quality
+        
+        # Generate content
+        response = model.generate_content(f"Summarize this text concisely: {text}")
+
+        # Extract and return text response
+        return response.text.strip()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
